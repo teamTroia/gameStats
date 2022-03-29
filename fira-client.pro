@@ -39,7 +39,6 @@ SOURCES += \
         include/vssref_command.pb.cc \
         include/vssref_common.pb.cc \
         include/vssref_placement.pb.cc \
-        Modulos/Area.cpp \
         Modulos/ffMath.cpp \
         Modulos/GameStats.cpp \
         Modulos/RefereeStats.cpp \
@@ -66,7 +65,6 @@ HEADERS += \
     include/vssref_common.pb.h \
     include/vssref_placement.pb.h \
     utils/timer/timer.h \
-    Modulos/include/Area.h \
     Modulos/include/ffMath.h \
     Modulos/include/FFtypes.h \
     Modulos/include/GameStats.h \

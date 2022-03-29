@@ -40,7 +40,7 @@ void GameStats::loop(){
         }
         std::cout << std::endl;
 
-        for (int i = 0; i < 3; i++){
+        for (int i = 0; i < 4; i++){
             std::cout << visionStats->getDataVision(i) << " ";
         }
         std::cout << std::endl;

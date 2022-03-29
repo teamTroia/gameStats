@@ -6,7 +6,7 @@ VisionStats::VisionStats(VisionClient *visionClient){
     game_on = false;
     setQtdeRobots(3);
 
-    for (int i = 0; i < 3; i ++){
+    for (int i = 0; i < 4; i ++){
         dataVision[i] = 0;
     }
 }
@@ -64,17 +64,27 @@ void VisionStats::checkPossession(infoPack visionPack){
         }
     }
 
-    if (minDistAzul > 300 and minDistAmarelo > 300){    // Posse neutra
-        tempoNeutro += (1.0 / 60.0) * 1000.0;
-    } else if (minDistAzul < minDistAmarelo){   // Posse azul
-        tempoAzul += (1.0 / 60.0) * 1000.0;
-    } else {    // Posse amarelo
-        tempoAmarelo += (1.0 / 60.0) * 1000.0;
+    if (minDistAzul < 300 or minDistAmarelo < 300){
+        if (minDistAzul < minDistAmarelo){   // Posse azul
+            tempoAzul += (1.0 / 60.0) * 1000.0;
+        } else {    // Posse amarelo
+            tempoAmarelo += (1.0 / 60.0) * 1000.0;
+        }
     }
 
-    dataVision[PosseAzul] = 100.0 * tempoAzul / (tempoNeutro + tempoAzul + tempoAmarelo);
-    dataVision[PosseAmarelo] = 100.0 * tempoAmarelo / (tempoNeutro + tempoAzul + tempoAmarelo);
-    dataVision[PosseNeutro] = 100.0 * tempoNeutro / (tempoNeutro + tempoAzul + tempoAmarelo);
+    dataVision[PosseAzul] = 100.0 * tempoAzul / (tempoAzul + tempoAmarelo);
+    dataVision[PosseAmarelo] = 100.0 * tempoAmarelo / (tempoAzul + tempoAmarelo);
+}
+
+void VisionStats::checkLadoCampo(infoPack visionPack){
+    if (visionPack.ball.position.x < tamCampo.x / 2){
+        tempoEsquerdo += (1.0 / 60.0) * 1000.0;
+    } else {
+        tempoDireito += (1.0 / 60.0) * 1000.0;
+    }
+
+    dataVision[ladoEsquerdo] = 100.0 * tempoEsquerdo / (tempoDireito + tempoEsquerdo);
+    dataVision[ladoDireito] = 100.0 * tempoDireito / (tempoDireito + tempoEsquerdo);
 }
 
 void VisionStats::checkVision(bool game_on){
@@ -86,6 +96,7 @@ void VisionStats::checkVision(bool game_on){
 
         if (game_on){
             checkPossession(visionPack);
+            checkLadoCampo(visionPack);
         }
     }
 }
