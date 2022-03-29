@@ -8,6 +8,8 @@ TARGET   = GameStats
 VERSION  = 1.0.0
 
 CONFIG += c++14 console
+CONFIG += link_pkgconfig
+PKGCONFIG += opencv4
 CONFIG -= app_bundle
 
 # Temporary dirs

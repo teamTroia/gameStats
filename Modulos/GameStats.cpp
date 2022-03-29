@@ -45,6 +45,8 @@ void GameStats::loop(){
         }
         std::cout << std::endl;
 
+        visionStats->plotMapaCalor();
+
         // Stop timer
         timer.stop();
 
