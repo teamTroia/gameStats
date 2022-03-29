@@ -9,12 +9,14 @@ VisionStats::VisionStats(VisionClient *visionClient){
     for (int i = 0; i < 4; i ++){
         dataVision[i] = 0;
     }
-
-    tempoParteCampo = new double*[100];
-    for (int i = 0; i < 100; i++){
-        tempoParteCampo[i] = new double[100];
-        for (int j = 0; j < 100; j++){
-            tempoParteCampo[i][j] = 0;
+    
+    for (int k = 0; k < 7; k++){
+        tempoParteCampo[k] = new double*[100];
+        for (int i = 0; i < 100; i++){
+            tempoParteCampo[k][i] = new double[100];
+            for (int j = 0; j < 100; j++){
+                tempoParteCampo[k][i][j] = 0;
+            }
         }
     }
 
@@ -105,8 +107,22 @@ void VisionStats::checkParteCampo(infoPack visionPack){
     for (int i = 0; i < 100; i++){
         for (int j = 0; j < 100; j++){
             if (visionPack.ball.position.x >= (i * tamCampo.x/100) and visionPack.ball.position.x < ((i+1) * tamCampo.x/100) and
-                visionPack.ball.position.y >= (j * tamCampo.y/100) and visionPack.ball.position.y < ((j+1) * tamCampo.y/100)){
-                    tempoParteCampo[i][j] += (1.0 / 60.0) * 1000.0;
+            visionPack.ball.position.y >= (j * tamCampo.y/100) and visionPack.ball.position.y < ((j+1) * tamCampo.y/100)){
+                tempoParteCampo[0][i][j] += (1.0 / 60.0) * 1000.0;
+            }
+
+            for (int k = 0; k < qtdeRobots; k++){
+                if (visionPack.blueRobots[k].position.x >= (i * tamCampo.x/100) and visionPack.blueRobots[k].position.x < ((i+1) * tamCampo.x/100) and
+                visionPack.blueRobots[k].position.y >= (j * tamCampo.y/100) and visionPack.blueRobots[k].position.y < ((j+1) * tamCampo.y/100)){
+                    tempoParteCampo[k + 1][i][j] += (1.0 / 60.0) * 1000.0;
+                }
+            }
+
+            for (int k = 0; k < qtdeRobots; k++){
+                if (visionPack.yellowRobots[k].position.x >= (i * tamCampo.x/100) and visionPack.yellowRobots[k].position.x < ((i+1) * tamCampo.x/100) and
+                visionPack.yellowRobots[k].position.y >= (j * tamCampo.y/100) and visionPack.yellowRobots[k].position.y < ((j+1) * tamCampo.y/100)){
+                    tempoParteCampo[k + 4][i][j] += (1.0 / 60.0) * 1000.0;
+                }
             }
         }
     }
@@ -139,7 +155,7 @@ double VisionStats::getDataVision(int data){
     return dataVision[data];
 }
 
-void VisionStats::plotMapaCalor(){
+void VisionStats::plotMapaCalor(int imgMode){
     cv::Mat img = cv::imread("campo.png");
     cv::Mat imgCopy;
     img.copyTo(imgCopy);
@@ -149,15 +165,15 @@ void VisionStats::plotMapaCalor(){
 
     for (int i = 0; i < 100; i++){
         for (int j = 0; j < 100; j ++){
-            if (tempoParteCampo[i][j] > maiorTempo) maiorTempo = tempoParteCampo[i][j];
-            if (tempoParteCampo[i][j] != 0) naoZerado++;
+            if (tempoParteCampo[imgMode][i][j] > maiorTempo) maiorTempo = tempoParteCampo[imgMode][i][j];
+            if (tempoParteCampo[imgMode][i][j] != 0) naoZerado++;
         }
     }
 
     double menorTempo = maiorTempo;
     for (int i = 0; i < 100; i++){
         for (int j = 0; j < 100; j ++){
-            if (tempoParteCampo[i][j] != 0 and tempoParteCampo[i][j] < menorTempo) menorTempo = tempoParteCampo[i][j];
+            if (tempoParteCampo[imgMode][i][j] != 0 and tempoParteCampo[imgMode][i][j] < menorTempo) menorTempo = tempoParteCampo[imgMode][i][j];
         }
     }
 
@@ -165,15 +181,15 @@ void VisionStats::plotMapaCalor(){
 
     for (int i = 0; i < 100; i++){
         for (int j = 0; j < 100; j ++){
-                if (tempoParteCampo[i][j] != 0){
+                if (tempoParteCampo[imgMode][i][j] != 0){
                 cv::Point2f pt1 = cv::Point2f(i * tamCampo.x/100, j * tamCampo.y/100);
                 cv::Point2f pt2 = cv::Point2f((i+1) * tamCampo.x/100, (j+1) * tamCampo.y/100);
                 int green = 255, red = 255;                    
                 
-                if (tempoParteCampo[i][j] < mediaTempo){
-                    red = (tempoParteCampo[i][j] - menorTempo) / (mediaTempo - menorTempo) * 255;
+                if (tempoParteCampo[imgMode][i][j] < mediaTempo){
+                    red = (tempoParteCampo[imgMode][i][j] - menorTempo) / (mediaTempo - menorTempo) * 255;
                 } else {
-                    green = (maiorTempo - tempoParteCampo[i][j]) / (maiorTempo - mediaTempo) * 255;
+                    green = (maiorTempo - tempoParteCampo[imgMode][i][j]) / (maiorTempo - mediaTempo) * 255;
                 }
 
                 cv::Scalar cor = cv::Scalar(0, green, red);
@@ -184,7 +200,6 @@ void VisionStats::plotMapaCalor(){
 
     cv::addWeighted(img, 0.6, imgCopy, 0.4, 0.0, img);
 
-    cv::namedWindow("img");
-    cv::imshow("img", img);
+    cv::imshow("GameStatsImage", img);
     cv::waitKey(1);
 }
